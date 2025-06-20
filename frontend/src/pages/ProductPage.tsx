@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useProducts } from '../hooks/useProducts';
 import { ProductTable } from '../components/productTable';
 import { ProductModal } from '../components/productModal';
 import { ProductPagination } from '../components/productPagination';
 import { SearchInput } from '../components/searchInput';
 import { Product, ProductFormData } from '../types/productTypes';
+import { useProductContext } from '../contexts/ProductContext';
 import './productPage.css';
 
 const ProductPage: React.FC = () => {
@@ -17,7 +17,7 @@ const ProductPage: React.FC = () => {
     createProduct,
     updateProduct,
     deleteProduct
-  } = useProducts();
+  } = useProductContext();
 
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -32,12 +32,18 @@ const ProductPage: React.FC = () => {
     await deleteProduct(id);
   };
 
-  
   const handleSubmit = async (formData: ProductFormData) => {
-    if (editingProduct) {
-      await updateProduct(editingProduct.id, formData);
-    } else {
-      await createProduct(formData);
+    try {
+      if (editingProduct) {
+        await updateProduct(editingProduct.id, formData);
+      } else {
+        await createProduct(formData);
+      }
+      
+      await fetchProducts(1, 10, searchTerm);
+      handleCloseModal();
+    } catch (error) {
+      console.error('Erro ao salvar produto:', error);
     }
   };
 
@@ -47,24 +53,25 @@ const ProductPage: React.FC = () => {
   };
 
   const handlePageChange = (page: number) => {
-    fetchProducts(page);
+    fetchProducts(page, 10, searchTerm);
   };
 
-  // ✅ Filtro corrigido - apenas por nome (campo que existe)
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSearch = () => {
+    fetchProducts(1, 10, searchTerm);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    fetchProducts(1, 10);
+  };
+
+  const displayedProducts = products || [];
 
   return (
     <div className="products-container">
       <div className="products-header">
         <h1>Gerenciamento de Produtos</h1>
         <div className="header-actions">
-          <SearchInput 
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Buscar por nome..."
-          />
           <button 
             onClick={() => setShowModal(true)}
             className="btn-primary"
@@ -81,11 +88,31 @@ const ProductPage: React.FC = () => {
       )}
 
       <ProductTable
-        products={filteredProducts}
+        products={displayedProducts}
         onEdit={handleEdit}
         onDelete={handleDelete}
         loading={loading}
       />
+
+      <div className="search-section">
+        <SearchInput 
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Buscar por nome..."
+        />
+        <button 
+          onClick={handleSearch}
+          className="btn-secondary"
+        >
+          Pesquisar
+        </button>
+        <button 
+          onClick={handleClearSearch}
+          className="btn-secondary"
+        >
+          Limpar
+        </button>
+      </div>
 
       {pagination && (
         <ProductPagination

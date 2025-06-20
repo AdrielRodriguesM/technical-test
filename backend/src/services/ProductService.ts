@@ -28,9 +28,9 @@ export class ProductService {
   }
 
   
-  async getAllProducts({page, limit}: Pagination): Promise<Product[]> {
+  async getAllProducts({page, limit, search}: Pagination): Promise<Product[]> {
     
-    return this.productRepository.getAllProducts({page, limit});
+    return this.productRepository.getAllProducts({page, limit, search});
   }
 
  

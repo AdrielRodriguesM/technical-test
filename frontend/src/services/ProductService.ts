@@ -1,6 +1,6 @@
 import { Product, ProductsResponse, ProductFormData } from '../types/productTypes';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export class ProductService {
   private getAuthHeaders(token: string) {
@@ -10,20 +10,23 @@ export class ProductService {
     };
   }
 
-  async getProducts(page: number = 1, limit: number = 10, token: string): Promise<ProductsResponse> {
-    const response = await fetch(
-      `${API_URL}/products?page=${page}&limit=${limit}`,
-      {
-        headers: this.getAuthHeaders(token)
-      }
-    );
+  async getProducts(page: number = 1, limit: number = 10, token: string, search?: string): Promise<ProductsResponse> {
+    let url = `${API_URL}/products?page=${page}&limit=${limit}`;
+    
+    if (search && search.trim()) {
+      url += `&search=${encodeURIComponent(search.trim())}`;
+    }
+
+    const response = await fetch(url, {
+      headers: this.getAuthHeaders(token)
+    });
 
     if (!response.ok) {
       const errorData = await response.text();
       console.error('Erro ao buscar produtos:', errorData);
       throw new Error('Erro ao buscar produtos');
     }
-
+    
     return response.json();
   }
 
@@ -49,7 +52,7 @@ export class ProductService {
 
   async updateProduct(id: number, productData: ProductFormData, token: string): Promise<Product> {
     const response = await fetch(`${API_URL}/products/${id}`, {
-      method: 'PATCH', // ✅ 
+      method: 'PATCH',
       headers: this.getAuthHeaders(token),
       body: JSON.stringify({
         name: productData.name,

@@ -38,7 +38,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     }
   }, [editingProduct]);
 
-  // ✅ Função handleSubmit que estava faltando
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -76,7 +76,6 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     }));
   };
 
-  // Se o modal não estiver aberto, não renderiza nada
   if (!isOpen) return null;
 
   return (

@@ -8,7 +8,7 @@ interface ProductContextType {
   loading: boolean;
   error: string;
   pagination: PaginationData | null;
-  fetchProducts: (page?: number, limit?: number) => Promise<void>;
+  fetchProducts: (page?: number, limit?: number, search?: string) => Promise<void>;
   createProduct: (productData: ProductFormData) => Promise<void>;
   updateProduct: (id: number, productData: ProductFormData) => Promise<void>;
   deleteProduct: (id: number) => Promise<void>;
@@ -23,14 +23,14 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState('');
   const [pagination, setPagination] = useState<PaginationData | null>(null);
 
-  const fetchProducts = async (page: number = 1, limit: number = 10) => {
+  const fetchProducts = async (page: number = 1, limit: number = 10, search?: string) => {
     if (!user?.token) return;
     
     setLoading(true);
     setError('');
     
     try {
-      const response: ProductsResponse = await productService.getProducts(page, limit, user.token);
+      const response: ProductsResponse = await productService.getProducts(page, limit, user.token, search);
       setProducts(response.data);
       setPagination(response.pagination);
     } catch (err) {

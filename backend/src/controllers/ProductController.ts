@@ -21,8 +21,11 @@ export class ProductController {
 
     async getAllProducts(req: Request, res: Response): Promise<void> {
         try {
-            const products = await this.productService.getAllProducts({page:req.query.page ? Number(req.query.page) : 1, limit: req.query.limit ? Number(req.query.limit) : 10 });
-            res.status(200).json(products);
+            const products = await this.productService.getAllProducts({
+                page: req.query.page ? Number(req.query.page) : 1,
+                limit: req.query.limit ? Number(req.query.limit) : 10,
+                search: req.query.search ? String(req.query.search) : undefined
+            });
 
         } catch (error) {
             res.status(500).json({ message: 'Erro ao listar os produtos', error });
